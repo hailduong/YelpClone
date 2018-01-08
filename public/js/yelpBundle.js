@@ -1,15 +1,15 @@
 window["yelpBundle"] =
 webpackJsonp_name_([0],{
 
-/***/ 380:
+/***/ 379:
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(381);
+module.exports = __webpack_require__(380);
 
 
 /***/ }),
 
-/***/ 381:
+/***/ 380:
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24,6 +24,10 @@ var _react2 = _interopRequireDefault(_react);
 var _reactDom = __webpack_require__(100);
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
+
+var _SearchBar = __webpack_require__(381);
+
+var _SearchBar2 = _interopRequireDefault(_SearchBar);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -102,33 +106,7 @@ var App = function (_React$Component) {
 						)
 					)
 				),
-				_react2.default.createElement(
-					"div",
-					{ className: "jumbotron" },
-					_react2.default.createElement(
-						"div",
-						{ className: "container" },
-						_react2.default.createElement(
-							"h1",
-							null,
-							"Hello, world!"
-						),
-						_react2.default.createElement(
-							"p",
-							null,
-							"This is a template for a simple marketing or informational website. It includes a large callout called a jumbotron and three supporting pieces of content. Use it as a starting point to create something more unique."
-						),
-						_react2.default.createElement(
-							"p",
-							null,
-							_react2.default.createElement(
-								"a",
-								{ className: "btn btn-primary btn-lg", href: "#", role: "button" },
-								"Learn more \xBB"
-							)
-						)
-					)
-				),
+				_react2.default.createElement(_SearchBar2.default, null),
 				_react2.default.createElement(
 					"div",
 					{ className: "container" },
@@ -223,9 +201,134 @@ var App = function (_React$Component) {
 	return App;
 }(_react2.default.Component);
 
-_reactDom2.default.render(_react2.default.createElement(App, null), document.querySelector('body'));
+_reactDom2.default.render(_react2.default.createElement(App, null), document.querySelector('#yelpClone'));
+
+/***/ }),
+
+/***/ 381:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(32);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var SearchBar = function (_React$Component) {
+	_inherits(SearchBar, _React$Component);
+
+	function SearchBar() {
+		var _ref;
+
+		var _temp, _this, _ret;
+
+		_classCallCheck(this, SearchBar);
+
+		for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+			args[_key] = arguments[_key];
+		}
+
+		return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = SearchBar.__proto__ || Object.getPrototypeOf(SearchBar)).call.apply(_ref, [this].concat(args))), _this), _this.state = {
+			currentKeyword: ''
+		}, _this.handleKeywordChange = function (event) {
+			console.log(event.target.value);
+			_this.setState({
+				currentKeyword: event.target.value
+			});
+		}, _this.handleKeywordKeyUp = function (event) {
+			if (!!_this.keywordKeyUpTimeout) clearTimeout(_this.keywordKeyUpTimeout);
+			_this.keywordKeyUpTimeout = setTimeout(function () {
+				_this.getAutoCompleteContent();
+			}, 200);
+		}, _temp), _possibleConstructorReturn(_this, _ret);
+	}
+
+	_createClass(SearchBar, [{
+		key: "render",
+		value: function render() {
+			return _react2.default.createElement(
+				"div",
+				{ className: "jumbotron" },
+				_react2.default.createElement(
+					"div",
+					{ className: "container" },
+					_react2.default.createElement(
+						"h3",
+						null,
+						"Search for the best places"
+					),
+					_react2.default.createElement(
+						"form",
+						{ className: "form-horizontal row" },
+						_react2.default.createElement(
+							"div",
+							{ className: "col-md-5" },
+							_react2.default.createElement("input", { type: "text", value: this.state.currentKeyword,
+								onChange: this.handleKeywordChange,
+								onKeyUp: this.handleKeywordKeyUp,
+								className: "form-control", placeholder: "Find" })
+						),
+						_react2.default.createElement(
+							"div",
+							{ className: "col-md-5" },
+							_react2.default.createElement("input", { type: "text", className: "form-control", placeholder: "Near" })
+						),
+						_react2.default.createElement(
+							"div",
+							{ className: "col-md-2" },
+							_react2.default.createElement(
+								"button",
+								{ type: "button", className: "btn btn-primary form-control" },
+								"Search"
+							)
+						)
+					)
+				)
+			);
+		}
+	}, {
+		key: "getAutoCompleteContent",
+		value: function getAutoCompleteContent() {
+			var apiKey = 'IVt9LM-smJrnfgrs8SBjQB_WuAkNyBnGkwrII_uabelfHnIHG0qeWw6GE0aN2Hk6QLckEx8026HHBXEGr6LvK0_FfYZWlPTu-RBnrBwAUfXnR9UcdpHnDXh7XZ9TWnYx';
+			jQuery.ajax({
+				url: 'ajax/autocomplete',
+				method: 'POST',
+				data: { text: this.state.currentKeyword },
+				crossDomain: true,
+				headers: {
+					'Authorization': "Bearer " + apiKey
+				},
+				success: function success(data) {
+					console.log('data', data);
+				},
+				error: function error(_error) {
+					console.warn(_error);
+				}
+			});
+		}
+	}]);
+
+	return SearchBar;
+}(_react2.default.Component);
+
+exports.default = SearchBar;
 
 /***/ })
 
-},[380])["default"];
+},[379])["default"];
 //# sourceMappingURL=yelpBundle.js.map
