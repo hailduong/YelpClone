@@ -20,6 +20,7 @@ export default class SearchBar extends React.Component {
 		}, 200);
 	};
 
+
 	render() {
 		return (
 			<div className="jumbotron">
@@ -36,7 +37,8 @@ export default class SearchBar extends React.Component {
 							<input type="text" className="form-control" placeholder="Near"/>
 						</div>
 						<div className="col-md-2">
-							<button type="button" className="btn btn-primary form-control">Search</button>
+							<button type="button" onClick={this.handleSearch} className="btn btn-primary form-control">Search
+							</button>
 						</div>
 					</form>
 				</div>
@@ -44,17 +46,32 @@ export default class SearchBar extends React.Component {
 		)
 	}
 
+	handleSearch = () => {
+		jQuery.ajax({
+			url: 'ajax/search',
+			method: 'POST',
+			data: {
+				term: this.state.currentKeyword,
+				longitude: -122.399972,
+				latitude: 37.786882,
+				offset: 10
+			},
+			crossDomain: true,
+			success: (data) => {
+				console.log('data', data)
+			},
+			error: (error) => {
+				console.warn(error)
+			}
+		})
+	};
 
 	getAutoCompleteContent() {
-		const apiKey = 'IVt9LM-smJrnfgrs8SBjQB_WuAkNyBnGkwrII_uabelfHnIHG0qeWw6GE0aN2Hk6QLckEx8026HHBXEGr6LvK0_FfYZWlPTu-RBnrBwAUfXnR9UcdpHnDXh7XZ9TWnYx';
 		jQuery.ajax({
 			url: 'ajax/autocomplete',
 			method: 'POST',
 			data: {text: this.state.currentKeyword},
 			crossDomain: true,
-			headers: {
-				'Authorization': `Bearer ${apiKey}`
-			},
 			success: (data) => {
 				console.log('data', data)
 			},
