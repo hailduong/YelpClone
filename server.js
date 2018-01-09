@@ -39,18 +39,14 @@ const getAutoCompleteContent = (text) => {
 	})
 };
 
-const getSearchContent = ({term, longitude, latitude, offset}) => {
-	const postData = {term, longitude, latitude, offset};
-
-	console.log(postData);
-
+const getSearchContent = (requestBody) => {
 	const options = {
 		uri: 'https://api.yelp.com/v3/businesses/search',
 		method: 'GET',
 		headers: {
 			'Authorization': `Bearer ${apiKey}`
 		},
-		qs: postData,
+		qs: requestBody,
 	};
 
 	return requestPromise(options, function(error, response, body) {

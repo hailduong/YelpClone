@@ -54,11 +54,13 @@ export default class SearchBar extends React.Component {
 				term: this.state.currentKeyword,
 				longitude: -122.399972,
 				latitude: 37.786882,
-				offset: 10
+				offset: 10,
+				limit: 10
 			},
 			crossDomain: true,
 			success: (data) => {
-				console.log('data', data)
+				console.log('Searched and received data.');
+				this.props.actions.setSearchResultData(data.data);
 			},
 			error: (error) => {
 				console.warn(error)

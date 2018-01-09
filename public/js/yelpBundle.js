@@ -33,6 +33,14 @@ var _Navbar = __webpack_require__(382);
 
 var _Navbar2 = _interopRequireDefault(_Navbar);
 
+var _BusinessItem = __webpack_require__(383);
+
+var _BusinessItem2 = _interopRequireDefault(_BusinessItem);
+
+var _Pagination = __webpack_require__(384);
+
+var _Pagination2 = _interopRequireDefault(_Pagination);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -45,19 +53,47 @@ var App = function (_React$Component) {
 	_inherits(App, _React$Component);
 
 	function App() {
+		var _ref;
+
+		var _temp, _this, _ret;
+
 		_classCallCheck(this, App);
 
-		return _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).apply(this, arguments));
+		for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+			args[_key] = arguments[_key];
+		}
+
+		return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = App.__proto__ || Object.getPrototypeOf(App)).call.apply(_ref, [this].concat(args))), _this), _this.state = {
+			searchData: []
+		}, _this.setSearchResultData = function (data) {
+			_this.setState({
+				searchData: data
+			});
+		}, _temp), _possibleConstructorReturn(_this, _ret);
 	}
 
 	_createClass(App, [{
 		key: "render",
 		value: function render() {
+
+			var self = this;
+
+			var actions = {
+				setSearchResultData: self.setSearchResultData
+			};
+
+			var state = this.state;
+			var businessData = this.state.searchData.businesses;
+
+			var searchResultNodes = !!businessData ? this.state.searchData.businesses.map(function (item) {
+				return _react2.default.createElement(_BusinessItem2.default, { key: item.id, data: item });
+			}) : null;
+
 			return _react2.default.createElement(
 				"div",
-				null,
+				{ className: "home" },
 				_react2.default.createElement(_Navbar2.default, null),
-				_react2.default.createElement(_SearchBar2.default, null),
+				_react2.default.createElement(_SearchBar2.default, { actions: actions }),
 				_react2.default.createElement(
 					"div",
 					{ className: "container" },
@@ -66,74 +102,16 @@ var App = function (_React$Component) {
 						{ className: "row" },
 						_react2.default.createElement(
 							"div",
-							{ className: "col-md-4" },
-							_react2.default.createElement(
-								"h2",
-								null,
-								"Heading"
-							),
-							_react2.default.createElement(
-								"p",
-								null,
-								"Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui."
-							),
-							_react2.default.createElement(
-								"p",
-								null,
-								_react2.default.createElement(
-									"a",
-									{ className: "btn btn-default", href: "#", role: "button" },
-									"View details \xBB"
-								)
-							)
+							{ className: "col-md-8 home__search-result" },
+							searchResultNodes
 						),
 						_react2.default.createElement(
 							"div",
-							{ className: "col-md-4" },
-							_react2.default.createElement(
-								"h2",
-								null,
-								"Heading"
-							),
-							_react2.default.createElement(
-								"p",
-								null,
-								"Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui."
-							),
-							_react2.default.createElement(
-								"p",
-								null,
-								_react2.default.createElement(
-									"a",
-									{ className: "btn btn-default", href: "#", role: "button" },
-									"View details \xBB"
-								)
-							)
-						),
-						_react2.default.createElement(
-							"div",
-							{ className: "col-md-4" },
-							_react2.default.createElement(
-								"h2",
-								null,
-								"Heading"
-							),
-							_react2.default.createElement(
-								"p",
-								null,
-								"Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus."
-							),
-							_react2.default.createElement(
-								"p",
-								null,
-								_react2.default.createElement(
-									"a",
-									{ className: "btn btn-default", href: "#", role: "button" },
-									"View details \xBB"
-								)
-							)
+							{ className: "col-md-4 home__sidebar" },
+							"This is a side bar"
 						)
 					),
+					_react2.default.createElement(_Pagination2.default, null),
 					_react2.default.createElement("hr", null),
 					_react2.default.createElement(
 						"footer",
@@ -214,11 +192,13 @@ var SearchBar = function (_React$Component) {
 					term: _this.state.currentKeyword,
 					longitude: -122.399972,
 					latitude: 37.786882,
-					offset: 10
+					offset: 10,
+					limit: 10
 				},
 				crossDomain: true,
 				success: function success(data) {
-					console.log('data', data);
+					console.log('Searched and received data.');
+					_this.props.actions.setSearchResultData(data.data);
 				},
 				error: function error(_error) {
 					console.warn(_error);
@@ -392,6 +372,226 @@ var Navbar = function (_React$Component) {
 }(_react2.default.Component);
 
 exports.default = Navbar;
+
+/***/ }),
+
+/***/ 383:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(30);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var BusinessItem = function (_React$Component) {
+	_inherits(BusinessItem, _React$Component);
+
+	function BusinessItem() {
+		_classCallCheck(this, BusinessItem);
+
+		return _possibleConstructorReturn(this, (BusinessItem.__proto__ || Object.getPrototypeOf(BusinessItem)).apply(this, arguments));
+	}
+
+	_createClass(BusinessItem, [{
+		key: "render",
+		value: function render() {
+			var _props$data = this.props.data,
+			    image_url = _props$data.image_url,
+			    name = _props$data.name,
+			    display_phone = _props$data.display_phone,
+			    location = _props$data.location,
+			    categories = _props$data.categories;
+
+			var address = location.display_address.join(" ");
+			var displayCategory = categories.map(function (item) {
+				return item.title;
+			}).join(" ,");
+			return _react2.default.createElement(
+				"div",
+				{ className: "row home__business" },
+				_react2.default.createElement(
+					"div",
+					{ className: "col-md-3 logo" },
+					_react2.default.createElement("img", { className: "img-responsive", src: image_url, alt: name })
+				),
+				_react2.default.createElement(
+					"div",
+					{ className: "col-md-9 info" },
+					_react2.default.createElement(
+						"h2",
+						{ className: "name" },
+						name
+					),
+					_react2.default.createElement(
+						"p",
+						{ className: "address" },
+						address
+					),
+					_react2.default.createElement(
+						"p",
+						{ className: "phone" },
+						display_phone
+					),
+					_react2.default.createElement(
+						"p",
+						null,
+						"Category: ",
+						displayCategory
+					)
+				)
+			);
+		}
+	}]);
+
+	return BusinessItem;
+}(_react2.default.Component);
+
+exports.default = BusinessItem;
+
+/***/ }),
+
+/***/ 384:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+	value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(30);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Pagination = function (_React$Component) {
+	_inherits(Pagination, _React$Component);
+
+	function Pagination() {
+		_classCallCheck(this, Pagination);
+
+		return _possibleConstructorReturn(this, (Pagination.__proto__ || Object.getPrototypeOf(Pagination)).apply(this, arguments));
+	}
+
+	_createClass(Pagination, [{
+		key: "render",
+		value: function render() {
+			return _react2.default.createElement(
+				"div",
+				{ className: "text-center home__pagination" },
+				_react2.default.createElement(
+					"nav",
+					{ "aria-label": "Page navigation" },
+					_react2.default.createElement(
+						"ul",
+						{ "class": "pagination" },
+						_react2.default.createElement(
+							"li",
+							null,
+							_react2.default.createElement(
+								"a",
+								{ href: "#", "aria-label": "Previous" },
+								_react2.default.createElement(
+									"span",
+									{ "aria-hidden": "true" },
+									"\xAB"
+								)
+							)
+						),
+						_react2.default.createElement(
+							"li",
+							null,
+							_react2.default.createElement(
+								"a",
+								{ href: "#" },
+								"1"
+							)
+						),
+						_react2.default.createElement(
+							"li",
+							null,
+							_react2.default.createElement(
+								"a",
+								{ href: "#" },
+								"2"
+							)
+						),
+						_react2.default.createElement(
+							"li",
+							null,
+							_react2.default.createElement(
+								"a",
+								{ href: "#" },
+								"3"
+							)
+						),
+						_react2.default.createElement(
+							"li",
+							null,
+							_react2.default.createElement(
+								"a",
+								{ href: "#" },
+								"4"
+							)
+						),
+						_react2.default.createElement(
+							"li",
+							null,
+							_react2.default.createElement(
+								"a",
+								{ href: "#" },
+								"5"
+							)
+						),
+						_react2.default.createElement(
+							"li",
+							null,
+							_react2.default.createElement(
+								"a",
+								{ href: "#", "aria-label": "Next" },
+								_react2.default.createElement(
+									"span",
+									{ "aria-hidden": "true" },
+									"\xBB"
+								)
+							)
+						)
+					)
+				)
+			);
+		}
+	}]);
+
+	return Pagination;
+}(_react2.default.Component);
+
+exports.default = Pagination;
 
 /***/ })
 

@@ -2,44 +2,52 @@ import React from "react";
 import ReactDOM from "react-dom";
 import SearchBar from "./SearchBar";
 import Navbar from "./Navbar";
+import BusinessItem from "./BusinessItem";
+import Pagination from "./Pagination";
 
 class App extends React.Component {
+	state = {
+		searchData: []
+	};
+
+	setSearchResultData = (data) => {
+		this.setState({
+			searchData: data
+		})
+	};
+
 	render() {
+
+		const self = this;
+
+		const actions = {
+			setSearchResultData: self.setSearchResultData
+		};
+
+
+		const state = this.state;
+		const businessData = this.state.searchData.businesses;
+
+		const searchResultNodes = !!businessData
+			? this.state.searchData.businesses.map((item) => {
+				return <BusinessItem key={item.id} data={item}/>
+			})
+			: null;
+
 		return (
-			<div>
+			<div className="home">
 				<Navbar/>
-				<SearchBar/>
+				<SearchBar actions={actions}/>
 				<div className="container">
 					<div className="row">
-						<div className="col-md-4">
-							<h2>Heading</h2>
-							<p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris
-							   condimentum
-							   nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed
-							   odio dui.
-							</p>
-							<p><a className="btn btn-default" href="#" role="button">View details &raquo;</a></p>
+						<div className="col-md-8 home__search-result">
+							{searchResultNodes}
 						</div>
-						<div className="col-md-4">
-							<h2>Heading</h2>
-							<p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris
-							   condimentum
-							   nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed
-							   odio dui.
-							</p>
-							<p><a className="btn btn-default" href="#" role="button">View details &raquo;</a></p>
-						</div>
-						<div className="col-md-4">
-							<h2>Heading</h2>
-							<p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula
-							   porta felis
-							   euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum
-							   massa justo sit
-							   amet risus.
-							</p>
-							<p><a className="btn btn-default" href="#" role="button">View details &raquo;</a></p>
+						<div className="col-md-4 home__sidebar">
+							This is a side bar
 						</div>
 					</div>
+					<Pagination/>
 					<hr/>
 					<footer>
 						<p>&copy; 2016 Company, Inc.</p>
