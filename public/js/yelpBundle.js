@@ -17,7 +17,7 @@ module.exports = __webpack_require__(380);
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = __webpack_require__(30);
+var _react = __webpack_require__(19);
 
 var _react2 = _interopRequireDefault(_react);
 
@@ -146,9 +146,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = __webpack_require__(30);
+var _react = __webpack_require__(19);
 
 var _react2 = _interopRequireDefault(_react);
+
+var _configs = __webpack_require__(386);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -173,28 +175,80 @@ var SearchBar = function (_React$Component) {
 		}
 
 		return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = SearchBar.__proto__ || Object.getPrototypeOf(SearchBar)).call.apply(_ref, [this].concat(args))), _this), _this.state = {
-			currentKeyword: ''
+			currentKeyword: '',
+			currentLocation: '',
+			currentPage: 1
 		}, _this.handleKeywordChange = function (event) {
-			console.log(event.target.value);
 			_this.setState({
 				currentKeyword: event.target.value
+			});
+		}, _this.handleLocationChange = function (event) {
+			_this.setState({
+				currentLocation: event.target.value
 			});
 		}, _this.handleKeywordKeyUp = function (event) {
 			if (!!_this.keywordKeyUpTimeout) clearTimeout(_this.keywordKeyUpTimeout);
 			_this.keywordKeyUpTimeout = setTimeout(function () {
 				_this.getAutoCompleteContent();
 			}, 200);
-		}, _this.handleSearch = function () {
+		}, _this.getCurrentLocation = function () {
+			var self = _this;
+			// Init geoCoder
+			if (!_this.geoCoder) _this.geoCoder = new google.maps.Geocoder();
+			var geoCoder = _this.geoCoder;
+			var latLongPromise = _this.getCurrentLatLong();
+
+			latLongPromise.then(function (latLng) {
+				geoCoder.geocode({ 'location': latLng }, function (results, status) {
+					console.log('Location received:', results);
+					var currentCityComponent = results[0].address_components.filter(function (item) {
+						return item.types[0] === "administrative_area_level_1";
+					});
+					var cityName = currentCityComponent[0].long_name;
+					self.setState({
+						currentLocation: cityName
+					});
+				});
+			});
+		}, _this.getCurrentLatLong = function () {
+			if ("geolocation" in navigator) {
+
+				var latLongPromise = new Promise(function (resolve, reject) {
+					navigator.geolocation.getCurrentPosition(function (position) {
+						console.log('Current location:', position.coords.latitude, position.coords.longitude);
+						resolve({
+							lng: position.coords.longitude,
+							lat: position.coords.latitude
+						});
+					});
+				});
+
+				return latLongPromise;
+			} else {
+				console.log('Geolocation is not avabilable');
+			}
+		}, _this.handleClickSearchBtn = function () {
+			_this.search(_this.state.currentKeyword);
+		}, _this.search = function () {
+			var keyword = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
+			var currentPage = _this.state.currentPage;
+			var currentLocation = _this.state.currentLocation;
+
+			if (!currentLocation) currentLocation = _configs.defaultLocation; // There will be results from this location
+
+			var offset = (currentPage - 1) * _configs.itemPerPage;
+
+			var postObject = {
+				term: keyword,
+				offset: offset,
+				limit: 10,
+				location: currentLocation
+			};
+
 			jQuery.ajax({
 				url: 'ajax/search',
 				method: 'POST',
-				data: {
-					term: _this.state.currentKeyword,
-					longitude: -122.399972,
-					latitude: 37.786882,
-					offset: 10,
-					limit: 10
-				},
+				data: postObject,
 				crossDomain: true,
 				success: function success(data) {
 					console.log('Searched and received data.');
@@ -212,7 +266,7 @@ var SearchBar = function (_React$Component) {
 		value: function render() {
 			return _react2.default.createElement(
 				"div",
-				{ className: "jumbotron" },
+				{ className: "jumbotron home__search-bar" },
 				_react2.default.createElement(
 					"div",
 					{ className: "container" },
@@ -230,19 +284,32 @@ var SearchBar = function (_React$Component) {
 							_react2.default.createElement("input", { type: "text", value: this.state.currentKeyword,
 								onChange: this.handleKeywordChange,
 								onKeyUp: this.handleKeywordKeyUp,
-								className: "form-control", placeholder: "Find" })
+								className: "form-control", placeholder: "Keyword: e.g. Food, drinks, etc..." })
 						),
 						_react2.default.createElement(
 							"div",
 							{ className: "col-md-5" },
-							_react2.default.createElement("input", { type: "text", className: "form-control", placeholder: "Near" })
+							_react2.default.createElement(
+								"div",
+								{ className: "input-group" },
+								_react2.default.createElement("input", { type: "text", className: "form-control",
+									placeholder: "Location: e.g. San Fransisco",
+									onChange: this.handleLocationChange,
+									value: this.state.currentLocation
+								}),
+								_react2.default.createElement(
+									"span",
+									{ className: "input-group-addon get-location", onClick: this.getCurrentLocation },
+									_react2.default.createElement("span", { title: "Get your current location", className: "glyphicon glyphicon-screenshot" })
+								)
+							)
 						),
 						_react2.default.createElement(
 							"div",
 							{ className: "col-md-2" },
 							_react2.default.createElement(
 								"button",
-								{ type: "button", onClick: this.handleSearch, className: "btn btn-primary form-control" },
+								{ type: "button", onClick: this.handleClickSearchBtn, className: "btn btn-primary form-control" },
 								"Search"
 							)
 						)
@@ -266,6 +333,15 @@ var SearchBar = function (_React$Component) {
 				}
 			});
 		}
+	}, {
+		key: "componentDidMount",
+		value: function componentDidMount() {
+			// Search to populate content on load
+			this.search();
+
+			// Get current location
+			this.getCurrentLocation();
+		}
 	}]);
 
 	return SearchBar;
@@ -287,7 +363,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = __webpack_require__(30);
+var _react = __webpack_require__(19);
 
 var _react2 = _interopRequireDefault(_react);
 
@@ -387,7 +463,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = __webpack_require__(30);
+var _react = __webpack_require__(19);
 
 var _react2 = _interopRequireDefault(_react);
 
@@ -424,7 +500,7 @@ var BusinessItem = function (_React$Component) {
 			}).join(" ,");
 			return _react2.default.createElement(
 				"div",
-				{ className: "row home__business" },
+				{ className: "row home__business animated fadeIn" },
 				_react2.default.createElement(
 					"div",
 					{ className: "col-md-3 logo" },
@@ -478,7 +554,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = __webpack_require__(30);
+var _react = __webpack_require__(19);
 
 var _react2 = _interopRequireDefault(_react);
 
@@ -510,7 +586,7 @@ var Pagination = function (_React$Component) {
 					{ "aria-label": "Page navigation" },
 					_react2.default.createElement(
 						"ul",
-						{ "class": "pagination" },
+						{ className: "pagination" },
 						_react2.default.createElement(
 							"li",
 							null,
@@ -592,6 +668,20 @@ var Pagination = function (_React$Component) {
 }(_react2.default.Component);
 
 exports.default = Pagination;
+
+/***/ }),
+
+/***/ 386:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var defaultLocation = exports.defaultLocation = "San Fransisco";
+var itemPerPage = exports.itemPerPage = 10;
 
 /***/ })
 

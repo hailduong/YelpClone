@@ -7,7 +7,7 @@ export default class BusinessItem extends React.Component {
 		const address = location.display_address.join(" ");
 		const displayCategory = categories.map((item) => item.title).join(" ,");
 		return (
-			<div className="row home__business">
+			<div className="row home__business animated fadeIn">
 				<div className="col-md-3 logo">
 					<img className="img-responsive" src={image_url} alt={name}/>
 				</div>
