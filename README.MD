@@ -4,9 +4,13 @@
 
 <img src="./YelpCloneScreenShot.jpg" width="600">
 
+---
+
+<img src="./YelpCloneMobileScreenShot.jpg" width="300">
+
 ## II. Project Info
 
-This web app was building to mimic Yelp. 
+This web app was built to mimic a few features of Yelp. 
 
 - You can search for businesses 
 - This app will ask for your **location**, so make sure you **give it permission** if you want to test it's feature
