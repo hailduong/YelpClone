@@ -4,7 +4,6 @@
 
 <img src="./YelpCloneScreenShot.jpg" width="600">
 
----
 
 <img src="./YelpCloneMobileScreenShot.jpg" width="300">
 
