@@ -3,7 +3,7 @@ const webpack = require('webpack');
 
 module.exports = {
 	entry: {
-		vendor: ['babel-polyfill', 'bootstrap', 'react', 'react-dom', 'react-transition-group'],
+		vendor: ['babel-polyfill', 'bootstrap', 'react', 'react-dom'],
 		yelpBundle: ['./src/App.js']
 	},
 	devtool: 'source-map',
