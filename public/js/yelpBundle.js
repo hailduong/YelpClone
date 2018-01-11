@@ -55,6 +55,10 @@ var _Pagination = __webpack_require__(385);
 
 var _Pagination2 = _interopRequireDefault(_Pagination);
 
+var _Loading = __webpack_require__(386);
+
+var _Loading2 = _interopRequireDefault(_Loading);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -81,10 +85,15 @@ var App = function (_React$Component) {
 			searchData: [],
 			locationFromLastSearch: "",
 			keywordFromLastSearch: "",
-			currentPage: 0
+			currentPage: 1,
+			loading: true
 		}, _this.setSearchResultData = function (data) {
 			_this.setState({
 				searchData: data
+			});
+		}, _this.setAppLoadingState = function (booleanValue) {
+			_this.setState({
+				loading: booleanValue
 			});
 		}, _this.setDataLastSearch = function (keyword, location) {
 			_this.setState({
@@ -106,70 +115,97 @@ var App = function (_React$Component) {
 
 			var actions = {
 				setSearchResultData: self.setSearchResultData,
-				setDataLastSearch: self.setDataLastSearch
+				setDataLastSearch: self.setDataLastSearch,
+				setAppLoadingState: self.setAppLoadingState
 			};
 
 			var locationFromLastSearch = this.state.locationFromLastSearch;
 			var keywordFromLastSearch = this.state.keywordFromLastSearch;
 			var businessData = this.state.searchData.businesses;
-			var totalResultFound = this.state.searchData.total;
+			var totalResultFound = !!this.state.searchData.total ? this.state.searchData.total : 0;
+			var loading = this.state.loading;
 
 			var searchResultNodes = !!businessData ? this.state.searchData.businesses.map(function (item) {
 				return _react2.default.createElement(_BusinessItem2.default, { key: item.id, data: item });
 			}) : null;
 
+			var paginationNode = totalResultFound === 0 ? null : _react2.default.createElement(_Pagination2.default, { currentPage: this.state.currentPage,
+				setCurrentPage: this.setCurrentPage,
+				totalResultFound: totalResultFound
+			});
+
+			var forKeywordText = !!keywordFromLastSearch ? _react2.default.createElement(
+				"span",
+				null,
+				"for ",
+				_react2.default.createElement(
+					"strong",
+					null,
+					keywordFromLastSearch,
+					"\xA0"
+				)
+			) : "";
+
 			return _react2.default.createElement(
 				"div",
 				{ className: "home" },
 				_react2.default.createElement(_Navbar2.default, null),
-				_react2.default.createElement(_SearchBar2.default, { actions: actions }),
+				_react2.default.createElement(_SearchBar2.default, { currentPage: this.state.currentPage, actions: actions }),
 				_react2.default.createElement(
 					"div",
-					{ className: "container" },
-					_react2.default.createElement("div", { className: "row" }),
-					_react2.default.createElement(
-						"div",
-						{ className: "col-md-12" },
-						_react2.default.createElement(
-							"h4",
-							null,
-							_react2.default.createElement(
-								"strong",
-								null,
-								totalResultFound
-							),
-							" results found for ",
-							keywordFromLastSearch,
-							" from ",
-							locationFromLastSearch
-						)
-					),
-					_react2.default.createElement(
+					{ className: "container home__search-result" },
+					loading ? _react2.default.createElement(
 						"div",
 						{ className: "row" },
 						_react2.default.createElement(
 							"div",
-							{ className: "col-md-8 home__search-result" },
-							searchResultNodes
+							{ className: "col-md-12" },
+							_react2.default.createElement(_Loading2.default, null)
+						)
+					) : _react2.default.createElement(
+						"div",
+						null,
+						_react2.default.createElement(
+							"div",
+							{ className: "row" },
+							_react2.default.createElement(
+								"div",
+								{ className: "col-md-12" },
+								_react2.default.createElement(
+									"h4",
+									{ className: "stats" },
+									_react2.default.createElement(
+										"strong",
+										null,
+										totalResultFound,
+										"\xA0"
+									),
+									"results found ",
+									forKeywordText,
+									"from ",
+									_react2.default.createElement(
+										"strong",
+										null,
+										locationFromLastSearch
+									)
+								)
+							)
 						),
 						_react2.default.createElement(
 							"div",
-							{ className: "col-md-4 home__sidebar" },
-							"This is a side bar"
-						)
+							{ className: "row home__search-result" },
+							searchResultNodes
+						),
+						paginationNode
 					),
-					_react2.default.createElement(_Pagination2.default, { currentPage: this.state.currentPage,
-						setCurrentPage: this.setCurrentPage,
-						totalResultFound: totalResultFound
-					}),
 					_react2.default.createElement("hr", null),
 					_react2.default.createElement(
 						"footer",
-						null,
+						{ className: "m-b-md" },
 						_react2.default.createElement(
 							"p",
 							null,
-							"\xA9 2016 Company, Inc."
+							"\xA9 2017 Yelp Clone, Inc."
 						)
 					)
 				)
@@ -227,7 +263,6 @@ var SearchBar = function (_React$Component) {
 		return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = SearchBar.__proto__ || Object.getPrototypeOf(SearchBar)).call.apply(_ref, [this].concat(args))), _this), _this.state = {
 			currentKeyword: '',
 			currentLocation: '',
-			currentPage: 1,
 			autoSuggestData: {},
 			keywordFieldIsFocused: false
 		}, _this.handleKeywordChange = function (event) {
@@ -296,7 +331,11 @@ var SearchBar = function (_React$Component) {
 		}, _this.search = function () {
 			var keyword = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : "";
 			var page = arguments[1];
-			var currentPage = _this.state.currentPage;
+
+
+			_this.props.actions.setAppLoadingState(true);
+
+			var currentPage = _this.props.currentPage;
 
 
 			if (!page) page = currentPage;
@@ -321,7 +360,15 @@ var SearchBar = function (_React$Component) {
 				crossDomain: true,
 				success: function success(data) {
 					console.log('Searched and received data.');
-					_this.props.actions.setSearchResultData(data.data);
+					if (data.statusCode === 200) {
+						_this.props.actions.setSearchResultData(data.data);
+					} else {
+						// Should handle errors here. 
+						// However, for a quick solution, I'll just mark it at not found 
+						_this.props.actions.setSearchResultData([]);
+						console.warn("For a quick solution, I'll just mark it at not found, but we should handle errors here:", data);
+					}
+					_this.props.actions.setAppLoadingState(false);
 				},
 				error: function error(_error) {
 					console.warn(_error);
@@ -384,7 +431,7 @@ var SearchBar = function (_React$Component) {
 						{ className: "form-horizontal row" },
 						_react2.default.createElement(
 							"div",
-							{ className: "col-md-5" },
+							{ className: "col-md-6" },
 							_react2.default.createElement("input", { type: "text", value: this.state.currentKeyword,
 								onChange: this.handleKeywordChange,
 								onKeyUp: this.handleKeywordKeyUp,
@@ -403,7 +450,7 @@ var SearchBar = function (_React$Component) {
 						),
 						_react2.default.createElement(
 							"div",
-							{ className: "col-md-5" },
+							{ className: "col-md-4" },
 							_react2.default.createElement(
 								"div",
 								{ className: "input-group" },
@@ -414,8 +461,8 @@ var SearchBar = function (_React$Component) {
 								}),
 								_react2.default.createElement(
 									"span",
-									{ className: "input-group-addon get-location", onClick: this.getCurrentLocation },
-									_react2.default.createElement("span", { title: "Get your current location", className: "glyphicon glyphicon-screenshot" })
+									{ title: "Get your current location", "data-toggle": "tooltip", className: "input-group-addon get-location", onClick: this.getCurrentLocation },
+									_react2.default.createElement("span", { className: "glyphicon glyphicon-screenshot" })
 								)
 							)
 						),
@@ -443,10 +490,11 @@ var SearchBar = function (_React$Component) {
 				data: { text: this.state.currentKeyword },
 				crossDomain: true,
 				success: function success(data) {
-					console.log('data', data);
-					_this2.setState({
-						autoSuggestData: data.data
-					});
+					if (data.statusCode === 200) {
+						_this2.setState({
+							autoSuggestData: data.data
+						});
+					}
 				},
 				error: function error(_error2) {
 					console.warn(_error2);
@@ -461,6 +509,11 @@ var SearchBar = function (_React$Component) {
 
 			// Get current location
 			this.getCurrentLocation();
+
+			// Init tooltip
+			$('[data-toggle="tooltip"]').tooltip({
+				container: 'body'
+			});
 		}
 	}]);
 
@@ -509,7 +562,7 @@ var Navbar = function (_React$Component) {
 		value: function render() {
 			return _react2.default.createElement(
 				"nav",
-				{ className: "navbar navbar-inverse navbar-fixed-top" },
+				{ className: "home__navbar navbar navbar-fixed-top" },
 				_react2.default.createElement(
 					"div",
 					{ className: "container" },
@@ -517,46 +570,10 @@ var Navbar = function (_React$Component) {
 						"div",
 						{ className: "navbar-header" },
 						_react2.default.createElement(
-							"button",
-							{ type: "button", className: "navbar-toggle collapsed", "data-toggle": "collapse", "data-target": "#navbar",
-								"aria-expanded": "false",
-								"aria-controls": "navbar" },
-							_react2.default.createElement(
-								"span",
-								{ className: "sr-only" },
-								"Toggle navigation"
-							),
-							_react2.default.createElement("span", { className: "icon-bar" }),
-							_react2.default.createElement("span", { className: "icon-bar" }),
-							_react2.default.createElement("span", { className: "icon-bar" })
-						),
-						_react2.default.createElement(
 							"a",
 							{ className: "navbar-brand", href: "#" },
-							"Yelp Clone"
-						)
-					),
-					_react2.default.createElement(
-						"div",
-						{ id: "navbar", className: "navbar-collapse collapse" },
-						_react2.default.createElement(
-							"form",
-							{ className: "navbar-form navbar-right" },
-							_react2.default.createElement(
-								"div",
-								{ className: "form-group" },
-								_react2.default.createElement("input", { type: "text", placeholder: "Email", className: "form-control" })
-							),
-							_react2.default.createElement(
-								"div",
-								{ className: "form-group" },
-								_react2.default.createElement("input", { type: "password", placeholder: "Password", className: "form-control" })
-							),
-							_react2.default.createElement(
-								"button",
-								{ type: "submit", className: "btn btn-success" },
-								"Sign in"
-							)
+							_react2.default.createElement("i", { className: "glyphicon glyphicon-tower" }),
+							" Yelp Clone"
 						)
 					)
 				)
@@ -612,7 +629,8 @@ var BusinessItem = function (_React$Component) {
 			    name = _props$data.name,
 			    display_phone = _props$data.display_phone,
 			    location = _props$data.location,
-			    categories = _props$data.categories;
+			    categories = _props$data.categories,
+			    url = _props$data.url;
 
 			var address = location.display_address.join(" ");
 			var displayCategory = categories.map(function (item) {
@@ -620,35 +638,43 @@ var BusinessItem = function (_React$Component) {
 			}).join(" ,");
 			return _react2.default.createElement(
 				"div",
-				{ className: "row home__business animated fadeIn" },
+				{ className: "col-md-6 home__business animated fadeIn" },
 				_react2.default.createElement(
 					"div",
-					{ className: "col-md-3 logo" },
-					_react2.default.createElement("img", { className: "img-responsive", src: image_url, alt: name })
-				),
-				_react2.default.createElement(
-					"div",
-					{ className: "col-md-9 info" },
+					{ className: "row" },
 					_react2.default.createElement(
-						"h2",
-						{ className: "name" },
-						name
+						"div",
+						{ className: "col-md-3 logo" },
+						_react2.default.createElement("span", { className: "logo-container", style: { backgroundImage: "url(" + image_url + ")" } })
 					),
 					_react2.default.createElement(
-						"p",
-						{ className: "address" },
-						address
-					),
-					_react2.default.createElement(
-						"p",
-						{ className: "phone" },
-						display_phone
-					),
-					_react2.default.createElement(
-						"p",
-						null,
-						"Category: ",
-						displayCategory
+						"div",
+						{ className: "col-md-9 info" },
+						_react2.default.createElement(
+							"h2",
+							{ className: "name" },
+							_react2.default.createElement(
+								"a",
+								{ href: url, target: "_blank" },
+								name
+							)
+						),
+						_react2.default.createElement(
+							"p",
+							{ className: "address" },
+							address
+						),
+						_react2.default.createElement(
+							"p",
+							{ className: "phone" },
+							display_phone
+						),
+						_react2.default.createElement(
+							"p",
+							null,
+							"Category: ",
+							displayCategory
+						)
 					)
 				)
 			);
@@ -729,46 +755,6 @@ var Pagination = function (_React$Component) {
 
 			var numberOfPages = Math.ceil(totalResultFound / _configs.itemPerPage);
 
-			var prevPage = currentPage - 1 > 0 ? _react2.default.createElement(
-				"li",
-				null,
-				_react2.default.createElement(
-					"a",
-					{ href: "#" },
-					currentPage - 1
-				)
-			) : null;
-
-			var prev2Page = currentPage - 2 > 0 ? _react2.default.createElement(
-				"li",
-				null,
-				_react2.default.createElement(
-					"a",
-					{ href: "#" },
-					currentPage - 2
-				)
-			) : null;
-
-			var nextPage = currentPage + 1 <= numberOfPages ? _react2.default.createElement(
-				"li",
-				null,
-				_react2.default.createElement(
-					"a",
-					{ href: "#" },
-					currentPage + 1
-				)
-			) : null;
-
-			var next2Page = currentPage + 2 <= numberOfPages ? _react2.default.createElement(
-				"li",
-				null,
-				_react2.default.createElement(
-					"a",
-					{ href: "#" },
-					currentPage + 2
-				)
-			) : null;
-
 			return _react2.default.createElement(
 				"div",
 				{ className: "text-center home__pagination" },
@@ -804,19 +790,16 @@ var Pagination = function (_React$Component) {
 								)
 							)
 						),
-						prev2Page,
-						prevPage,
 						_react2.default.createElement(
 							"li",
-							null,
+							{ className: "active" },
 							_react2.default.createElement(
 								"a",
 								{ href: "#" },
+								"Page: ",
 								currentPage
 							)
 						),
-						nextPage,
-						next2Page,
 						_react2.default.createElement(
 							"li",
 							null,
@@ -853,6 +836,39 @@ var Pagination = function (_React$Component) {
 }(_react2.default.Component);
 
 exports.default = Pagination;
+
+/***/ }),
+
+/***/ 386:
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _react = __webpack_require__(19);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function Loading() {
+    return _react2.default.createElement(
+        "div",
+        { className: "page-loading text-center" },
+        _react2.default.createElement(
+            "div",
+            { className: "spinner" },
+            _react2.default.createElement("div", { className: "cube1" }),
+            _react2.default.createElement("div", { className: "cube2" })
+        )
+    );
+}
+
+exports.default = Loading;
 
 /***/ })
 

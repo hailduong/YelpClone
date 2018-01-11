@@ -6,7 +6,6 @@ export default class SearchBar extends React.Component {
 	state = {
 		currentKeyword: '',
 		currentLocation: '',
-		currentPage: 1,
 		autoSuggestData: {},
 		keywordFieldIsFocused: false
 	};
@@ -124,7 +123,7 @@ export default class SearchBar extends React.Component {
 				<div className="container">
 					<h3>Search for the best places</h3>
 					<form className="form-horizontal row">
-						<div className="col-md-5">
+						<div className="col-md-6">
 							<input type="text" value={this.state.currentKeyword}
 								   onChange={this.handleKeywordChange}
 								   onKeyUp={this.handleKeywordKeyUp}
@@ -137,15 +136,15 @@ export default class SearchBar extends React.Component {
 								</ul>
 							</div>
 						</div>
-						<div className="col-md-5">
+						<div className="col-md-4">
 							<div className="input-group">
 								<input type="text" className="form-control"
 									   placeholder="Location: e.g. San Fransisco"
 									   onChange={this.handleLocationChange}
 									   value={this.state.currentLocation}
 								/>
-								<span className="input-group-addon get-location" onClick={this.getCurrentLocation}>
-									<span title="Get your current location" className="glyphicon glyphicon-screenshot"></span>
+								<span title="Get your current location" data-toggle="tooltip" className="input-group-addon get-location" onClick={this.getCurrentLocation}>
+									<span className="glyphicon glyphicon-screenshot"></span>
 								</span>
 							</div>
 						</div>
@@ -165,7 +164,9 @@ export default class SearchBar extends React.Component {
 
 	search = (keyword = "", page) => {
 
-		let {currentPage} = this.state;
+		this.props.actions.setAppLoadingState(true);
+		
+		let {currentPage} = this.props;
 
 		if (!page) page = currentPage;
 		let {currentLocation} = this.state;
@@ -189,7 +190,15 @@ export default class SearchBar extends React.Component {
 			crossDomain: true,
 			success: (data) => {
 				console.log('Searched and received data.');
-				this.props.actions.setSearchResultData(data.data);
+				if (data.statusCode === 200) {
+					this.props.actions.setSearchResultData(data.data);
+				} else {
+					// Should handle errors here. 
+					// However, for a quick solution, I'll just mark it at not found 
+					this.props.actions.setSearchResultData([]);
+					console.warn("For a quick solution, I'll just mark it at not found, but we should handle errors here:", data);
+				}
+				this.props.actions.setAppLoadingState(false)
 			},
 			error: (error) => {
 				console.warn(error)
@@ -204,10 +213,11 @@ export default class SearchBar extends React.Component {
 			data: {text: this.state.currentKeyword},
 			crossDomain: true,
 			success: (data) => {
-				console.log('data', data);
-				this.setState({
-					autoSuggestData: data.data
-				})
+				if (data.statusCode === 200) {
+					this.setState({
+						autoSuggestData: data.data
+					})
+				}
 			},
 			error: (error) => {
 				console.warn(error)
@@ -222,6 +232,11 @@ export default class SearchBar extends React.Component {
 
 		// Get current location
 		this.getCurrentLocation();
+		
+		// Init tooltip
+		$('[data-toggle="tooltip"]').tooltip({
+			container:'body'
+		});
 	}
 
 }

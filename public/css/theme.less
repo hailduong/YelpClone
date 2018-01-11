@@ -1,0 +1,66 @@
+@import "./global.less";
+@import "./spinner.less";
+@import "./margin-padding";
+@screen-sm-max:991px;
+.home{
+	&__navbar{
+		&{ box-shadow:0 0 40px rgba(0, 0, 0, 0.3); background-color:#03A9F4; border-color:#039BE5; }
+		.navbar-brand{ color:#fff; opacity:1; transition:opacity 0.3s }
+		.navbar-brand:hover{ opacity:0.7 }
+	}
+
+	&__search-bar{
+		&{ background-color:#E1F5FE }
+		h3{ margin-top:35px; opacity:0.8; }
+		input{ border-color:#CFD8DC; box-shadow:none; -webkit-box-shadow:none; color:rgb(86, 90, 92); }
+		.form-control{ height:39px; }
+		.input-group-addon{ background-color:#eceff1; border-color:#cfd8dc; color:rgba(86, 90, 92, 0.70); cursor:pointer; transition:all 0.3s }
+		.input-group-addon:hover{ background-color:#03A9F4; color:#fff; }
+
+		.btn-primary{ background-color:#4CAF50; border-color:#43A047; outline:0; box-shadow:12px 15px 20px rgba(0, 0, 0, 0.1); transition:all 0.2s ease-in-out; }
+		.btn-primary:hover{ box-shadow:2px 4px 8px 0 rgba(0, 0, 0, 0.1) }
+		.btn-primary:focus, .btn-primary:active{ outline:none }
+		.btn-primary:active:focus{ background-color:#43A047; border-color:#388E3C }
+
+		.dropdown-menu{ width:100%; padding:0;
+			li{ padding:9px 12px; border-bottom:1px solid #CFD8DC; transition:background-color 0.3s }
+			li:hover{ cursor:pointer; background-color:rgba(225, 245, 254, 0.5) }
+			li:last-child{ border-bottom:0 }
+		}
+
+		/* Mobile devices (MOBILE < 992px) */
+		@media (max-width:@screen-sm-max){
+			&{ padding:50px 10px 30px }
+			h3{ font-size:18px; margin-bottom:12px; }
+			.form-horizontal > div{ margin-bottom:10px; }
+		}
+	}
+
+	&__search-result{
+		&{ color:#565a5c }
+		h4.stats{ font-weight:400; margin-bottom:30px; }
+	}
+
+	&__business{
+		&{ margin-bottom:30px; }
+		.info{ padding-left:25px; }
+		h2.name{ font-size:18px; margin-top:0; }
+		p{ margin-bottom:0; }
+		a{ color:#03A9F4; transition:color 0.3s; }
+		a:hover{ color:#43A047 }
+		.logo-container{ display:block; width:140px; height:90px; background-size:cover; background-position:center;
+			border-radius:5px; }
+
+		/* Mobile devices (MOBILE < 992px) */
+		@media (max-width:@screen-sm-max){
+			&{ border-bottom:1px solid #CFD8DC; padding-bottom:25px; }
+			.logo{ margin-bottom:10px; }
+			.info{ padding-left:15px; }
+		}
+	}
+
+	&__pagination{
+		li a{ color:#565a5c; transition: all 0.3s; }
+		li.active a{ background-color:#03a9f4; border-color:#03a9f4; }
+	}
+}

@@ -27,23 +27,7 @@ export default class Pagination extends React.Component {
 
 		const {currentPage, totalResultFound} = this.props;
 		const numberOfPages = Math.ceil(totalResultFound / itemPerPage);
-
-		const prevPage = currentPage - 1 > 0
-			? <li><a href="#">{currentPage - 1}</a></li>
-			: null;
-
-		const prev2Page = currentPage - 2 > 0
-			? <li><a href="#">{currentPage - 2}</a></li>
-			: null;
-
-
-		const nextPage = (currentPage + 1) <= numberOfPages
-			? <li><a href="#">{currentPage + 1}</a></li>
-			: null;
-
-		const next2Page = (currentPage + 2) <= numberOfPages
-			? <li><a href="#">{currentPage + 2}</a></li>
-			: null;
+		
 
 		return (
 			<div className="text-center home__pagination">
@@ -59,11 +43,7 @@ export default class Pagination extends React.Component {
 								<span aria-hidden="true">Prev</span>
 							</a>
 						</li>
-						{prev2Page}
-						{prevPage}
-						<li><a href="#">{currentPage}</a></li>
-						{nextPage}
-						{next2Page}
+						<li className="active"><a href="#">Page: {currentPage}</a></li>
 						<li>
 							<a onClick={this.setNextPage} href="#" aria-label="Next">
 								<span aria-hidden="true">Next</span>

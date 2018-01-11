@@ -4,18 +4,26 @@ import SearchBar from "./SearchBar";
 import Navbar from "./Navbar";
 import BusinessItem from "./BusinessItem";
 import Pagination from "./Pagination";
+import Loading from "./Loading";
 
 class App extends React.Component {
 	state = {
 		searchData: [],
 		locationFromLastSearch: "",
 		keywordFromLastSearch: "",
-		currentPage: 0
+		currentPage: 1,
+		loading: true
 	};
 
 	setSearchResultData = (data) => {
 		this.setState({
 			searchData: data
+		})
+	};
+
+	setAppLoadingState = (booleanValue) => {
+		this.setState({
+			loading: booleanValue
 		})
 	};
 
@@ -38,13 +46,16 @@ class App extends React.Component {
 
 		const actions = {
 			setSearchResultData: self.setSearchResultData,
-			setDataLastSearch: self.setDataLastSearch
+			setDataLastSearch: self.setDataLastSearch,
+			setAppLoadingState: self.setAppLoadingState
 		};
 
 		const locationFromLastSearch = this.state.locationFromLastSearch;
 		const keywordFromLastSearch = this.state.keywordFromLastSearch;
 		const businessData = this.state.searchData.businesses;
-		const totalResultFound = this.state.searchData.total;
+		const totalResultFound = !!this.state.searchData.total ? this.state.searchData.total : 0;
+		const loading = this.state.loading;
+
 
 		const searchResultNodes = !!businessData
 			? this.state.searchData.businesses.map((item) => {
@@ -52,31 +63,44 @@ class App extends React.Component {
 			})
 			: null;
 
+		const paginationNode = totalResultFound === 0
+			? null
+			: (<Pagination currentPage={this.state.currentPage}
+						   setCurrentPage={this.setCurrentPage}
+						   totalResultFound={totalResultFound}
+			/>);
+
+		const forKeywordText = !!keywordFromLastSearch ? <span>for <strong>{keywordFromLastSearch}&nbsp;</strong></span> : "";
+
 		return (
 			<div className="home">
 				<Navbar/>
-				<SearchBar actions={actions}/>
-				<div className="container">
-					<div className="row"></div>
-					<div className="col-md-12">
-						<h4><strong>{totalResultFound}</strong> results found for {keywordFromLastSearch} from {locationFromLastSearch}
-						</h4>
-					</div>
-					<div className="row">
-						<div className="col-md-8 home__search-result">
-							{searchResultNodes}
-						</div>
-						<div className="col-md-4 home__sidebar">
-							This is a side bar
-						</div>
-					</div>
-					<Pagination currentPage={this.state.currentPage}
-								setCurrentPage={this.setCurrentPage}
-								totalResultFound={totalResultFound}
-					/>
+				<SearchBar currentPage={this.state.currentPage} actions={actions}/>
+				<div className="container home__search-result">
+					{loading
+						? (<div className="row">
+							<div className="col-md-12">
+								<Loading/>
+							</div>
+						</div>)
+						: (<div>
+								<div className="row">
+									<div className="col-md-12">
+										<h4 className="stats"><strong>{totalResultFound}&nbsp;</strong>
+											results found {forKeywordText}
+											from <strong>{locationFromLastSearch}</strong>
+										</h4>
+									</div>
+								</div>
+								<div className="row home__search-result">
+									{searchResultNodes}
+								</div>
+								{paginationNode}
+							</div>
+					 )}
 					<hr/>
-					<footer>
-						<p>&copy; 2016 Company, Inc.</p>
+					<footer className="m-b-md">
+						<p>&copy; 2017 Yelp Clone, Inc.</p>
 					</footer>
 				</div>
 			</div>

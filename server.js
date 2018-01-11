@@ -61,9 +61,12 @@ app.post('/ajax/autocomplete', function(req, res) {
 	getAutoCompleteContent(autoCompleteText)
 		.then((data) => {
 			res.send({
-				code: 200,
+				statusCode: 200,
 				data: JSON.parse(data),
 			});
+		})
+		.catch((error) => {
+			res.send(error);
 		});
 });
 
@@ -74,9 +77,12 @@ app.post('/ajax/search', function(req, res) {
 	getSearchContent(requestBody)
 		.then((data) => {
 			res.send({
-				code: 200,
+				statusCode: 200,
 				data: JSON.parse(data)
 			});
+		})
+		.catch((error) => {
+			res.send(error);
 		});
 });
 
