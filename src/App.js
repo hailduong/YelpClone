@@ -7,7 +7,10 @@ import Pagination from "./Pagination";
 
 class App extends React.Component {
 	state = {
-		searchData: []
+		searchData: [],
+		locationFromLastSearch: "",
+		keywordFromLastSearch: "",
+		currentPage: 0
 	};
 
 	setSearchResultData = (data) => {
@@ -16,17 +19,32 @@ class App extends React.Component {
 		})
 	};
 
+	setDataLastSearch = (keyword, location) => {
+		this.setState({
+			keywordFromLastSearch: keyword,
+			locationFromLastSearch: location
+		})
+	};
+
+	setCurrentPage = (pageNumber) => {
+		this.setState({
+			currentPage: pageNumber
+		})
+	};
+
 	render() {
 
 		const self = this;
 
 		const actions = {
-			setSearchResultData: self.setSearchResultData
+			setSearchResultData: self.setSearchResultData,
+			setDataLastSearch: self.setDataLastSearch
 		};
 
-
-		const state = this.state;
+		const locationFromLastSearch = this.state.locationFromLastSearch;
+		const keywordFromLastSearch = this.state.keywordFromLastSearch;
 		const businessData = this.state.searchData.businesses;
+		const totalResultFound = this.state.searchData.total;
 
 		const searchResultNodes = !!businessData
 			? this.state.searchData.businesses.map((item) => {
@@ -39,6 +57,11 @@ class App extends React.Component {
 				<Navbar/>
 				<SearchBar actions={actions}/>
 				<div className="container">
+					<div className="row"></div>
+					<div className="col-md-12">
+						<h4><strong>{totalResultFound}</strong> results found for {keywordFromLastSearch} from {locationFromLastSearch}
+						</h4>
+					</div>
 					<div className="row">
 						<div className="col-md-8 home__search-result">
 							{searchResultNodes}
@@ -47,7 +70,10 @@ class App extends React.Component {
 							This is a side bar
 						</div>
 					</div>
-					<Pagination/>
+					<Pagination currentPage={this.state.currentPage}
+								setCurrentPage={this.setCurrentPage}
+								totalResultFound={totalResultFound}
+					/>
 					<hr/>
 					<footer>
 						<p>&copy; 2016 Company, Inc.</p>

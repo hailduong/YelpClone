@@ -6,12 +6,36 @@ export default class SearchBar extends React.Component {
 	state = {
 		currentKeyword: '',
 		currentLocation: '',
-		currentPage: 1
+		currentPage: 1,
+		autoSuggestData: {},
+		keywordFieldIsFocused: false
 	};
+
+	componentWillReceiveProps(nextProps) {
+		if (this.props.currentPage !== nextProps.currentPage) {
+			this.search(this.state.currentKeyword, nextProps.currentPage)
+		}
+	}
 
 	handleKeywordChange = (event) => {
 		this.setState({
 			currentKeyword: event.target.value
+		})
+	};
+
+	handleKeywordBlur = (event) => {
+		if (!!this.keywordBlurTimeout) clearTimeout(this.keywordBlurTimeout);
+
+		this.keywordBlurTimeout = setTimeout(() => {
+			this.setState({
+				keywordFieldIsFocused: false
+			})
+		}, 100)
+	};
+
+	handleKeywordFocus = (event) => {
+		this.setState({
+			keywordFieldIsFocused: true
 		})
 	};
 
@@ -70,6 +94,31 @@ export default class SearchBar extends React.Component {
 	};
 
 	render() {
+
+		const self = this;
+
+		const {keywordFieldIsFocused} = this.state;
+
+		const autoSuggestionItemTemplate = (text) => {
+
+			const setKeyword = () => {
+				self.setState({
+					currentKeyword: text
+				}, self.search(text));
+			};
+
+			return (<li onClick={setKeyword} key={text}>{text}</li>);
+		};
+
+		const thereAreTerms = !!this.state.autoSuggestData.terms;
+		const dropdownItems = thereAreTerms
+			? this.state.autoSuggestData.terms.map((term) => {
+				return autoSuggestionItemTemplate(term.text);
+			})
+			: null;
+
+		const dropDownShouldBeOpen = keywordFieldIsFocused && thereAreTerms;
+
 		return (
 			<div className="jumbotron home__search-bar">
 				<div className="container">
@@ -79,7 +128,14 @@ export default class SearchBar extends React.Component {
 							<input type="text" value={this.state.currentKeyword}
 								   onChange={this.handleKeywordChange}
 								   onKeyUp={this.handleKeywordKeyUp}
+								   onBlur={this.handleKeywordBlur}
+								   onFocus={this.handleKeywordFocus}
 								   className="form-control" placeholder="Keyword: e.g. Food, drinks, etc..."/>
+							<div className={`dropdown ${dropDownShouldBeOpen ? "open" : ""}`}>
+								<ul className="dropdown-menu animated fadeIn" aria-labelledby="dLabel">
+									{dropdownItems}
+								</ul>
+							</div>
 						</div>
 						<div className="col-md-5">
 							<div className="input-group">
@@ -107,13 +163,16 @@ export default class SearchBar extends React.Component {
 		this.search(this.state.currentKeyword);
 	};
 
-	search = (keyword = "") => {
+	search = (keyword = "", page) => {
 
-		const {currentPage} = this.state;
+		let {currentPage} = this.state;
+
+		if (!page) page = currentPage;
 		let {currentLocation} = this.state;
 		if (!currentLocation) currentLocation = defaultLocation; // There will be results from this location
+		this.props.actions.setDataLastSearch(keyword, currentLocation);
 
-		const offset = (currentPage - 1) * itemPerPage;
+		const offset = (page - 1) * itemPerPage;
 
 		const postObject = {
 			term: keyword,
@@ -121,6 +180,7 @@ export default class SearchBar extends React.Component {
 			limit: 10,
 			location: currentLocation
 		};
+
 
 		jQuery.ajax({
 			url: 'ajax/search',
@@ -144,7 +204,10 @@ export default class SearchBar extends React.Component {
 			data: {text: this.state.currentKeyword},
 			crossDomain: true,
 			success: (data) => {
-				console.log('data', data)
+				console.log('data', data);
+				this.setState({
+					autoSuggestData: data.data
+				})
 			},
 			error: (error) => {
 				console.warn(error)
