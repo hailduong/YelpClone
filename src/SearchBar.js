@@ -1,7 +1,9 @@
 import React from "react";
 import {defaultLocation, itemPerPage} from "./misc/configs";
+import {connect} from "react-redux";
+import * as Actions from "./misc/actions";
 
-export default class SearchBar extends React.Component {
+class SearchBar extends React.Component {
 
 	state = {
 		currentKeyword: '',
@@ -109,13 +111,15 @@ export default class SearchBar extends React.Component {
 			return (<li onClick={setKeyword} key={text}>{text}</li>);
 		};
 
-		const thereAreTerms = !!this.state.autoSuggestData.terms;
+		const thereAreTerms = !!this.props.autoSuggestData.terms;
+		
 		const dropdownItems = thereAreTerms
-			? this.state.autoSuggestData.terms.map((term) => {
+			? this.props.autoSuggestData.terms.map((term) => {
 				return autoSuggestionItemTemplate(term.text);
 			})
 			: null;
-
+		
+		
 		const dropDownShouldBeOpen = keywordFieldIsFocused && thereAreTerms;
 
 		return (
@@ -143,7 +147,8 @@ export default class SearchBar extends React.Component {
 									   onChange={this.handleLocationChange}
 									   value={this.state.currentLocation}
 								/>
-								<span title="Get your current location" data-toggle="tooltip" className="input-group-addon get-location" onClick={this.getCurrentLocation}>
+								<span title="Get your current location" data-toggle="tooltip"
+									  className="input-group-addon get-location" onClick={this.getCurrentLocation}>
 									<span className="glyphicon glyphicon-screenshot"></span>
 								</span>
 							</div>
@@ -164,16 +169,17 @@ export default class SearchBar extends React.Component {
 
 	search = (keyword = "", page) => {
 
-		this.props.actions.setAppLoadingState(true);
-		
+		//this.props.actions.setAppLoadingState(true);
+
 		let {currentPage} = this.props;
 
 		if (!page) page = currentPage;
 		let {currentLocation} = this.state;
 		if (!currentLocation) currentLocation = defaultLocation; // There will be results from this location
-		this.props.actions.setDataLastSearch(keyword, currentLocation);
-
-		const offset = (page - 1) * itemPerPage;
+		//this.props.actions.setDataLastSearch(keyword, currentLocation);
+		const limit = 10;
+		let offset = (page - 1) * itemPerPage;
+		if ((offset + offset) >= 1000) offset = 1000 - limit;
 
 		const postObject = {
 			term: keyword,
@@ -183,60 +189,38 @@ export default class SearchBar extends React.Component {
 		};
 
 
-		jQuery.ajax({
-			url: 'ajax/search',
-			method: 'POST',
-			data: postObject,
-			crossDomain: true,
-			success: (data) => {
-				console.log('Searched and received data.');
-				if (data.statusCode === 200) {
-					this.props.actions.setSearchResultData(data.data);
-				} else {
-					// Should handle errors here. 
-					// However, for a quick solution, I'll just mark it at not found 
-					this.props.actions.setSearchResultData([]);
-					console.warn("For a quick solution, I'll just mark it at not found, but we should handle errors here:", data);
-				}
-				this.props.actions.setAppLoadingState(false)
-			},
-			error: (error) => {
-				console.warn(error)
-			}
-		})
+		this.props.search(postObject)
 	};
 
 	getAutoCompleteContent() {
-		jQuery.ajax({
-			url: 'ajax/autocomplete',
-			method: 'POST',
-			data: {text: this.state.currentKeyword},
-			crossDomain: true,
-			success: (data) => {
-				if (data.statusCode === 200) {
-					this.setState({
-						autoSuggestData: data.data
-					})
-				}
-			},
-			error: (error) => {
-				console.warn(error)
-			}
-		})
-
+		const currentKeyword = this.state.currentKeyword;
+		this.props.getAutoCompleteContent(currentKeyword)
 	}
 
 	componentDidMount() {
 		// Search to populate content on load
 		this.search();
 
-		// Get current location
-		this.getCurrentLocation();
-		
 		// Init tooltip
 		$('[data-toggle="tooltip"]').tooltip({
-			container:'body'
+			container: 'body'
 		});
 	}
 
 }
+
+const mapStateToProps = (state) => ({
+	currentPage: state.currentPage,
+	autoSuggestData: state.autoSuggestData
+});
+
+const mapDispatchToProps = (dispatch) => ({
+	search: (postObject) => {
+		dispatch(Actions.search(postObject))
+	},
+	getAutoCompleteContent: (keyword) => {
+		dispatch(Actions.autoComplete(keyword));
+	}
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(SearchBar);
